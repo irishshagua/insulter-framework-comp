@@ -1,0 +1,347 @@
+openapi: 3.0.0
+info:
+  title: Insulter
+  description: |
+    A reference open api spec to be implemented for any service wishing to be compared
+  version: 0.0.1
+  contact:
+    name: irishshagua
+    email: brian_satchwannabe@hotmail.com
+tags:
+  - name: management
+    description: |
+      These operations are managing insult templates
+  - name: user
+    description: |
+      This for the user to interact with the insults generator
+paths:
+  /insults:
+    get:
+      summary: |
+        Returns a pageable view of all the insults stored in the DB
+      tags:
+        - management
+      parameters:
+        - $ref: "#/components/parameters/RatingFilter"
+        - $ref: "#/components/parameters/StatusFilter"
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        200:
+          description: |
+            All insults within the limit of a page size have been returned for this query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsultsQueryResult"
+        default:
+          description: |
+            An error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    post:
+      summary: |
+        Create a new insult
+      tags:
+        - management
+      requestBody:
+        $ref: "#/components/requestBodies/CreateInsultRequest"
+      responses:
+        201:
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+          description: |
+            The insult was successfully created and is available at the location provided in the response headers
+        default:
+          description: |
+            An error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /insults/{insult_id}:
+    get:
+      summary: |
+        View the full details for a single insult
+      tags:
+        - management
+      parameters:
+        - $ref: "#/components/parameters/InsultIdPathParam"
+      responses:
+        200:
+          description: |
+            The details of this insult, including not insult related metadata has been successfully
+            retrieved from the server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsultFullDetails"
+        default:
+          description: |
+            An error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+    put:
+      summary: |
+        Update the insult resource
+      tags:
+        - management
+      parameters:
+        - $ref: "#/components/parameters/InsultIdPathParam"
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateInsultRequest"
+      responses:
+        204:
+          description: |
+            The details of this insult have been successfully updated as per the request
+        default:
+          description: |
+            An error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /insult/{name}:
+    get:
+      summary: |
+        Generate a random insult
+      tags:
+        - user
+      parameters:
+        - $ref: "#/components/parameters/InsultTargetParam"
+      responses:
+        200:
+          description: |
+            A random insult was chosen and the target name was injected into the template. The result
+            of which has been returned.
+          content:
+            text/plain:
+              schema:
+                type: String
+                example: |
+                  Shurup Brian, ya big eegit
+        default:
+          description: |
+            An error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+
+components:
+  headers:
+    Location:
+      description: |
+        The Location header indicates the URL of a newly created resource
+      schema:
+        type: string
+        format: uri
+      example: /insults/{id}
+  parameters:
+    InsultTargetParam:
+      name: name
+      description: |
+        The name of the target of the insult. This value will be injected into an insult template
+      in: path
+      required: true
+      schema:
+        type: string
+    InsultIdPathParam:
+      name: insult_id
+      description: |
+        An opaque id used to identify an insult resource
+      in: path
+      required: true
+      schema:
+        type: string
+    RatingFilter:
+      name: rating
+      description: |
+        A filter which can be applied to the pagable view of all insults which can limit the results based on
+        the type of insult desired.
+      in: path
+      required: false
+      schema:
+        $ref: "#/components/schemas/Rating"
+    StatusFilter:
+      name: state
+      description: |
+        A filter which can be applied to the pagable view of all insults which can limit the results based on
+        the state of insult desired.
+      in: path
+      required: false
+      schema:
+        $ref: "#/components/schemas/Status"
+    Limit:
+      name: limit
+      description: |
+        Upper bound for number of results to be returned from the pageable view of all insurlts. A default limit will
+        be applied if this is not present
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Cursor:
+      name: cursor
+      description: |
+        An encoded value which represents a point in the data from where
+        pagination will commence. The pagination direction (either forward or backward)
+        will also be encoded within the cursor value. The cursor value will always
+        be generated server side
+      in: query
+      required: false
+      schema:
+        type: string
+  requestBodies:
+    CreateInsultRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - created_by
+              - insult_details
+            properties:
+              created_by:
+                type: string
+                description: |
+                  For audit purposes, this field should be populated with some identifying detail of the creator
+              insult_details:
+                $ref: "#/components/schemas/InsultDetails"
+    UpdateInsultRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - updated_by
+              - insult_details
+            properties:
+              updated_by:
+                type: string
+                description: |
+                  For audit purposes, this field should be populated with some identifying detail of the creator
+              insult_details:
+                $ref: "#/components/schemas/InsultFullDetails"
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: |
+            An absolute URI that identifies the problem type.  When dereferenced,
+            it SHOULD provide human-readable documentation for the problem type
+            (e.g., using HTML).
+          default: 'about:blank'
+        title:
+          type: string
+          description: |
+            A short, summary of the problem type. Written in english and readable
+            for engineers (usually not suited for non technical stakeholders and
+            not localized); example: Service Unavailable
+        status:
+          type: integer
+          format: int32
+          description: |
+            The HTTP status code generated by the origin server for this occurrence
+            of the problem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+          example: 503
+        detail:
+          type: string
+          description: |
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Connection to database timed out
+    PaginationLink:
+      type: string
+      format: uri
+      description: |
+        Hyperlink to a page of data
+      readOnly: true
+      example: /insults?cursor=abc123&limit=5
+    InsultsQueryResult:
+      type: object
+      required:
+        - items
+      properties:
+        prev:
+          $ref: "#/components/schemas/PaginationLink"
+        next:
+          $ref: "#/components/schemas/PaginationLink"
+        items:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/InsultDetails"
+    InsultFullDetails:
+      type: object
+      required:
+        - details
+        - created_by
+        - created
+        - modified_by
+        - modified
+        - status
+      properties:
+        details:
+          $ref: "#/components/schemas/InsultDetails"
+        created:
+          description: |
+            Indicates the timestamp that this resource was initially created
+          type: string
+          format: date-time
+          readOnly: true
+        created_by:
+          description: |
+            Represents and identifier to trace who first created this resource
+          type: string
+          readOnly: true
+        modified:
+          description: |
+            Indicates the timestamp that this resource was last modified
+          type: string
+          format: date-time
+          readOnly: true
+        modified_by:
+          description: |
+            Represents the identifier to trace who last modified this resource
+          type: string
+          readOnly: true
+        status:
+          $ref: "#/components/schemas/Status"
+    InsultDetails:
+      type: object
+      required:
+        - content
+        - rating
+      properties:
+        content:
+          type: string
+          description: |
+            This is the template string for the insult. The string should include the {name} field which will have a
+            name injected into it when the insult is being generated
+          example: Shurup {name}, ya big eegit
+        rating:
+          $ref: "#/components/schemas/Rating"
+    Rating:
+      type: string
+      enum: [explicit, childish, all]
+      default: all
+    Status:
+      type: string
+      enum: [active, inactive, all]
+      default: all

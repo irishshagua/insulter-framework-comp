@@ -4,21 +4,17 @@ Intentions for this repo are to have a simple CRUD service built to a mimum set 
 ## Repository Layout
 This repository is seperated into a folder structure described below. Each section should have its own README with more detail.
 
-```
+<big><pre>
 project
 │   README.md
-│   etc...  
 │
 └─── api
 │       api.yaml
-│       README.md
-│   
-│   
-└─── tests
-│       README.md
+│       [README.md](api/README.md)
 │
+└─── tests
+│       [README.md](tests/README.md)
 │
 └─── impls
-        README.md
-```
-
+        [README.md](impls/README.md)
+</pre></big>
