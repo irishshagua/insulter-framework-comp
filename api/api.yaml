@@ -122,7 +122,7 @@ paths:
           content:
             text/plain:
               schema:
-                type: String
+                type: string
                 example: |
                   Shurup Brian, ya big eegit
         default:
@@ -164,7 +164,7 @@ components:
       description: |
         A filter which can be applied to the pagable view of all insults which can limit the results based on
         the type of insult desired.
-      in: path
+      in: query
       required: false
       schema:
         $ref: "#/components/schemas/Rating"
@@ -173,7 +173,7 @@ components:
       description: |
         A filter which can be applied to the pagable view of all insults which can limit the results based on
         the state of insult desired.
-      in: path
+      in: query
       required: false
       schema:
         $ref: "#/components/schemas/Status"
