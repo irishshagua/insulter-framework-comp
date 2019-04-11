@@ -1,7 +1,24 @@
-use actix_web::{App, HttpRequest, HttpResponse, Result, http::Method};
+use actix_web::{App, HttpRequest, HttpResponse, Result, http::Method, Responder, Error};
+use crate::domain::{InsultTemplate, Rating};
 
-fn ok(_req: &HttpRequest) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().finish())
+impl Responder for InsultTemplate {
+    type Item = HttpResponse;
+    type Error = Error;
+
+    fn respond_to<S>(self, _: &HttpRequest<S>) -> Result<HttpResponse, Error> {
+        let body = serde_json::to_string(&self)?;
+
+        Ok(HttpResponse::Ok()
+            .content_type("application/json")
+            .body(body))
+    }
+}
+
+fn ok(_req: &HttpRequest) -> impl Responder {
+    InsultTemplate {
+        content: "You {name}, are a muppet".to_string(),
+        rating: Rating::Explicit
+    }
 }
 
 fn created(_req: &HttpRequest) -> Result<HttpResponse> {

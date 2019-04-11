@@ -1,8 +1,12 @@
 extern crate actix_web;
+extern crate serde;
+extern crate serde_json;
+#[macro_use] extern crate serde_derive;
 
 use actix_web::server;
 
 mod api;
+mod domain;
 
 fn main() {
 
