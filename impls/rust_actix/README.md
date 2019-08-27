@@ -7,10 +7,10 @@ To build locally you need the rust toolsuite installed. Best to use [rustup](htt
 Once setup you can use `cargo` as per below to build and run the app locally.
 ```bash
 cargo run & # Wait for the line: Running `target/debug/rust-web-svc`
-curl -i localhost:8088/insult/brian
+curl -i localhost:8000/insult/Brian
 ```
 
 Then to stop the app:
 ```bash
- kill $(lsof -ti tcp:8088)
+ kill $(lsof -ti tcp:8000)
 ```
