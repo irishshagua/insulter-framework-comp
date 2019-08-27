@@ -1,11 +1,12 @@
 [package]
 name = "rust-web-svc"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Brian Mooney <brian_satchwannabe@hotmail.com>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "0.7"
+actix-web = "1.0"
 serde = "1.0.90"
 serde_derive = "1.0.90"
 serde_json = "1.0.39"
+env_logger = "0.6.2"

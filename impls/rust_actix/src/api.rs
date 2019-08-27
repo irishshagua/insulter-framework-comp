@@ -1,55 +1,33 @@
-use actix_web::{App, HttpRequest, HttpResponse, Result, http::Method, Responder, Error};
 use crate::domain::{InsultTemplate, Rating};
+use actix_web::web::{Json, Path};
+use actix_web::{get, post, Responder};
 
-impl Responder for InsultTemplate {
-    type Item = HttpResponse;
-    type Error = Error;
-
-    fn respond_to<S>(self, _: &HttpRequest<S>) -> Result<HttpResponse, Error> {
-        let body = serde_json::to_string(&self)?;
-
-        Ok(HttpResponse::Ok()
-            .content_type("application/json")
-            .body(body))
-    }
+#[get("/insults")]
+pub fn retrieve_all_insults() -> impl Responder {
+    Json(
+        InsultTemplate {
+            content: "You {name}, are a muppet".to_string(),
+            rating: Rating::Explicit,
+        }
+    )
 }
 
-fn ok(_req: &HttpRequest) -> impl Responder {
-    InsultTemplate {
-        content: "You {name}, are a muppet".to_string(),
-        rating: Rating::Explicit
-    }
+#[post("/insults")]
+pub fn create_new_insult(incoming: Json<InsultTemplate>) -> impl Responder {
+    format!("Created new insult: {}", incoming.content)
 }
 
-fn created(_req: &HttpRequest) -> Result<HttpResponse> {
-    Ok(HttpResponse::Created().header("Location", "/insults/1").finish())
+#[get("/insults/{id}")]
+pub fn get_specific_insult(id: String) -> impl Responder {
+    Json(
+        InsultTemplate {
+            content: id,
+            rating: Rating::Explicit,
+        }
+    )
 }
 
-fn updated(_req: &HttpRequest) -> Result<HttpResponse> {
-    Ok(HttpResponse::NoContent().finish())
-}
-
-fn insult(_req: &HttpRequest) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().content_type("text/plain").body(format!("Muppet")))
-}
-
-pub fn insult_mgmt() -> App {
-    App::new()
-        .prefix("/insults")
-        .resource("", |r| {
-            r.method(Method::GET).f(ok);
-            r.method(Method::POST).f(created);
-        })
-        .resource("/{insult_id}", |r| {
-            r.method(Method::GET).f(ok);
-            r.method(Method::PUT).f(updated);
-        })
-}
-
-pub fn insulter() -> App {
-    App::new()
-        .prefix("/insult")
-        .resource("{name}", |r| {
-            r.method(Method::GET).f(insult);
-        })
+#[get("/insult/{data}")]
+pub fn apply_random_insult_to_name(francis: Path<String>) -> impl Responder {
+    format!("Fuck You {}!", francis)
 }
